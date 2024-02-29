@@ -1,34 +1,106 @@
 #include "binary_trees.h"
-
 /**
- * binary_tree_balance - Measures the balance factor of a binary tree.
- * @tree: A pointer to the root node of the tree to measure the balance factor.
- *
- * Return: If tree is NULL, return 0, else return balance factor.
+ * successor - get the next successor i mean the min node in the right subtree
+ * @node: tree to check
+ * Return: the min value of this tree
  */
-int binary_tree_balance(const binary_tree_t *tree)
+int successor(bst_t *node)
 {
-	if (tree)
-		return (binary_tree_height(tree->left) - binary_tree_height(tree->right));
+	int left = 0;
 
-	return (0);
-}
-
-/**
- * binary_tree_height - Measures the height of a binary tree.
- * @tree: A pointer to the root node of the tree to measure the height.
- *
- * Return: If tree is NULL, your function must return 0, else return height.
- */
-size_t binary_tree_height(const binary_tree_t *tree)
-{
-	if (tree)
+	if (node == NULL)
 	{
-		size_t l = 0, r = 0;
-
-		l = tree->left ? 1 + binary_tree_height(tree->left) : 1;
-		r = tree->right ? 1 + binary_tree_height(tree->right) : 1;
-		return ((l > r) ? l : r);
+		return (0);
 	}
-	return (0);
+	else
+	{
+		left = successor(node->left);
+		if (left == 0)
+		{
+			return (node->n);
+		}
+		return (left);
+	}
+
+}
+/**
+ * two_children - function that gets the next successor using the min
+ * value in the right subtree, and then replace the node value for
+ * this successor
+ * @root: node tat has two children
+ * Return: the value found
+ */
+int two_children(bst_t *root)
+{
+	int new_value = 0;
+
+	new_value = successor(root->right);
+	root->n = new_value;
+	return (new_value);
+}
+/**
+ *remove_type - function that removes a node depending of its children
+ *@root: node to remove
+ *Return: 0 if it has no children or other value if it has
+ */
+int remove_type(bst_t *root)
+{
+	if (!root->left && !root->right)
+	{
+		if (root->parent->right == root)
+			root->parent->right = NULL;
+		else
+			root->parent->left = NULL;
+		free(root);
+		return (0);
+	}
+	else if ((!root->left && root->right) || (!root->right && root->left))
+	{
+		if (!root->left)
+		{
+			if (root->parent->right == root)
+				root->parent->right = root->right;
+			else
+				root->parent->left = root->right;
+			root->right->parent = root->parent;
+		}
+		if (!root->right)
+		{
+			if (root->parent->right == root)
+				root->parent->right = root->left;
+			else
+				root->parent->left = root->left;
+			root->left->parent = root->parent;
+		}
+		free(root);
+		return (0);
+	}
+	else
+		return (two_children(root));
+}
+/**
+ * bst_remove - remove a node from a BST tree
+ * @root: root of the tree
+ * @value: node with this value to remove
+ * Return: the tree changed
+ */
+bst_t *bst_remove(bst_t *root, int value)
+{
+	int type = 0;
+
+	if (root == NULL)
+		return (NULL);
+	if (value < root->n)
+		bst_remove(root->left, value);
+	else if (value > root->n)
+		bst_remove(root->right, value);
+	else if (value == root->n)
+	{
+		type = remove_type(root);
+		if (type != 0)
+			bst_remove(root->right, type);
+	}
+	else
+		return (NULL);
+	return (root);
 }
