@@ -24,4 +24,5 @@ parent->left = newNode;
 if (newNode->left)
 newNode->left->parent = newNode;
 
-return (newNo
+return (newNode);
+}
